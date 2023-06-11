@@ -10,12 +10,21 @@ public class Main{  //Environment
 		System.out.println("Initial Tree:");
 		bot.tree();
 		
-		System.out.println("\nPlay , suppose bot chose R over S");
-		System.out.println("JUDGE -> R vs S: "+judge.response('R','S'));
-		System.out.println("Punish bot");
-		bot.punish('R','S');
+		System.out.println("\nPlay ");
+		char A = 'P';
+		char B = bot.play(A);
+		int result = judge.response(A,B);
+		System.out.println("JUDGE -> "+A+" vs "+B+": "+result);
+		if(result == 1){
+			System.out.println("Punish bot");
+			bot.punish(A,B);
+		}
+		else if(result == -1){
+			System.out.println("Reward bot");
+			bot.reward(A,B);
+		}
 		
-		System.out.println("Tree after punishment:");
+		System.out.println("Tree after evolution:");
 		bot.tree();
 		
 		
