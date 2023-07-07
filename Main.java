@@ -194,38 +194,14 @@ class Agent{
 
 class Judge{
     public static int response(char A,char B){
-        if(A == 'R'){
-            if(B == 'P'){
-                return 1;
-            }
-            else if(B == 'R'){
-                return 0;
-            }
-            else{
-                return -1;
-            }
+        if(A==B){
+            return 0;
         }
-        else if(A == 'P'){
-            if(B == 'S'){
-                return 1;
-            }
-            else if(B == 'P'){
-                return 0;
-            }
-            else{
-                return -1;
-            }
+        else if((A=='R' && B=='S')||(A=='S' && B=='P')||(A=='P' && B=='S')){
+            return -1;
         }
         else{
-            if(B == 'R'){
-                return 1;
-            }
-            else if(B == 'S'){
-                return 0;
-            }
-            else{
-                return -1;
-            }
+            return 1;
         }
     }
 }
