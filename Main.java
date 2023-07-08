@@ -197,7 +197,7 @@ class Judge{
         if(A==B){
             return 0;
         }
-        else if((A=='R' && B=='S')||(A=='S' && B=='P')||(A=='P' && B=='S')){
+        else if((A=='R' && B=='S')||(A=='S' && B=='P')||(A=='P' && B=='R')){
             return -1;
         }
         else{
