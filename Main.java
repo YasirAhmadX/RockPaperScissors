@@ -4,196 +4,179 @@ import java.util.Random;
 public class Main{  //Environment
     public static void main(String[] args) {
         System.out.println("Rock Paper Scissors Game");
-		Agent bot = new Agent();
-		Judge judge = new Judge();
+		Agent bot = new Agent(5,5,5);
+        Judge j = new Judge();
 		
 		System.out.println("Initial Tree:");
 		bot.tree();
-		
-		System.out.println("\nPlay ");
-		char A = 'P';
-		char B = bot.play(A);
-		int result = judge.response(A,B);
-		System.out.println("JUDGE -> "+A+" vs "+B+": "+result);
-		if(result == 1){
-			System.out.println("Punish bot");
-			bot.punish(A,B);
-		}
-		else if(result == -1){
-			System.out.println("Reward bot");
-			bot.reward(A,B);
-		}
-		
-		System.out.println("Tree after evolution:");
-		bot.tree();
-		
-		
-		
+        
+        char[] plays = {'P','R','S'};
+        for(int i=0;i<100;i++)
+        {          
+            System.out.println("\nPlay "+(i+1));
+            Random r = new Random();
+            char A = plays[r.nextInt(0,3)];
+            char B = bot.play(A);
+            int result = j.verdict(A,B);
+            System.out.println("JUDGE -> "+A+" vs "+B+": "+result);
+            if(result == -1){
+                System.out.println("Punish bot");
+                bot.punish(A,B);
+            }
+            else if(result == 1){
+                System.out.println("Reward bot");
+                bot.reward(A,B);
+            }
+            
+            System.out.println("Tree after "+i+" evolution:");
+            bot.tree();
+        }
     }
 }
 
-class Agent{
-    static char[] RockTree = {'P','P','P','R','R','R','S','S','S'};
-    static char[] PaperTree = {'P','P','P','R','R','R','S','S','S'};
-    static char[] SciTree = {'P','P','P','R','R','R','S','S','S'};
+class Matchbox{
+    int RockBeads;
+    int PaperBeads;
+    int SciBeads;
+    int totalBeads;
 
-    public  static char play(char opponentChoice){
+    public void setBeads(int RockBeads,int PaperBeads,int SciBeads){
+        this.RockBeads = RockBeads;
+        this.PaperBeads = PaperBeads;
+        this.SciBeads = SciBeads;
+        this.totalBeads = RockBeads + PaperBeads + SciBeads;
+    }
+
+    public void remove(char bead){
+        
+        if(bead == 'R' && this.RockBeads>0){
+            this.RockBeads--;
+            this.totalBeads--;
+        }
+        else if(bead == 'P' && this.PaperBeads>0){
+            this.PaperBeads--;
+            this.totalBeads--;
+
+        }
+        else if(bead == 'S' && this.SciBeads>0){
+            this.SciBeads--;
+            this.totalBeads--;
+        }
+    }
+
+    public void add(char bead){
+        if(bead == 'R'){
+            this.RockBeads++;
+        }
+        else if(bead == 'P'){
+            this.PaperBeads++;
+
+        }
+        else if(bead == 'S'){
+            this.SciBeads++;
+        }
+        this.totalBeads++;
+    }
+
+}
+
+class Agent{
+    Matchbox RockTree = new Matchbox(); //= {'P','P','P','R','R','R','S','S','S'};
+    Matchbox PaperTree = new Matchbox();// = {'P','P','P','R','R','R','S','S','S'};
+    Matchbox SciTree = new Matchbox(); // = {'P','P','P','R','R','R','S','S','S'};
+    
+
+    public Agent(int RockTree,int PaperTree,int SciTree){
+        this.RockTree.setBeads(RockTree,PaperTree,SciTree);
+        this.PaperTree.setBeads(RockTree,PaperTree,SciTree);
+        this.SciTree.setBeads(RockTree,PaperTree,SciTree);
+
+    }
+
+    public char play(char opponentChoice){
         Random rand = new Random();
+        char response;
+        Matchbox Tree;
         if(opponentChoice == 'R'){
-            char response = RockTree[rand.nextInt(RockTree.length)];
-			while(response == 'X'){
-				response = RockTree[rand.nextInt(RockTree.length)];
-			}
-			return response;
+            Tree = RockTree;
         }
         else if(opponentChoice == 'P'){
-			char response = PaperTree[rand.nextInt(PaperTree.length)];
-			while(response == 'X'){
-				response = PaperTree[rand.nextInt(PaperTree.length)];
-			}
-			return response;
+            Tree = PaperTree;
         }
         else{
-            char response = SciTree[rand.nextInt(SciTree.length)];
-			while(response == 'X'){
-				response = SciTree[rand.nextInt(SciTree.length)];
-			}
-			return response;
+            Tree = SciTree;
         }
+
+        //Suppose the tree is arranged as array [r,r,r,p,p,s,s,s,s] then picking randomly
+        int bead = rand.nextInt(Tree.totalBeads);
+        if(bead <= Tree.RockBeads){
+            response = 'R';
+        }
+        else if(bead <= Tree.RockBeads + Tree.PaperBeads){
+            response = 'P';
+        }
+        else{
+            response = 'S';
+        }
+        return response;
     }
 
     public void tree(){
-		float countR,countP,countS,countTotal;
-		countR=0;
-		countP=0;
-		countS=0;
-		countTotal=0;
-		
-		System.out.println("\nRock Tree:");
-		for(char c:RockTree){
-			System.out.print(c+" ");
-			countTotal++;
-			if(c == 'R'){
-				countR++;
-			}
-			else if(c == 'P'){
-				countP++;
-			}
-			else if(c == 'S'){
-				countS++;
-			}
-			else{
-				countTotal--; //As X is never drawn so reduce total count(dont count X)
-			}
-		}
-		System.out.printf("\nProbabilities:\nRock: %f\tPaper: %f\tScissors: %f\n",(countR/countTotal),(countP/countTotal),(countS/countTotal));
-		
-		countR=0;
-		countP=0;
-		countS=0;
-		countTotal=0;
-		
-		System.out.println("\nPaper Tree");
-		for(char c:PaperTree){
-			System.out.print(c+" ");
-			countTotal++;
-			if(c == 'R'){
-				countR++;
-			}
-			else if(c == 'P'){
-				countP++;
-			}
-			else if(c == 'S'){
-				countS++;
-			}
-			else{
-				countTotal--; //As X is never drawn so reduce total count(dont count X)
-			}
-		}
-		System.out.printf("\nProbabilities:\nRock: %f\tPaper: %f\tScissors: %f\n",(countR/countTotal),(countP/countTotal),(countS/countTotal));
-		
-		countR=0;
-		countP=0;
-		countS=0;
-		countTotal=0;
-		
-		System.out.println("\nScissors Tree: ");
-		for(char c:SciTree){
-			System.out.print(c+" ");
-			countTotal++;
-			if(c == 'R'){
-				countR++;
-			}
-			else if(c == 'P'){
-				countP++;
-			}
-			else if(c == 'S'){
-				countS++;
-			}
-			else{
-				countTotal--; //As X is never drawn so reduce total count(dont count X)
-			}
-		}
-		System.out.printf("\nProbabilities:\nRock: %f\tPaper: %f\tScissors: %f\n",(countR/countTotal),(countP/countTotal),(countS/countTotal));
+        Matchbox Tree  = this.RockTree;
+        System.out.println("==Rock Tree report==");
+        System.out.println("Probability of Rock: "+((double)(Tree.RockBeads)/Tree.totalBeads));
+        System.out.println("Probability of Paper: "+((double)(Tree.PaperBeads)/Tree.totalBeads));
+        System.out.println("Probability of Scissor: "+((double)(Tree.SciBeads)/Tree.totalBeads));
+
+        Tree  = this.PaperTree;
+        System.out.println("==Paper Tree report==");
+        System.out.println("Probability of Rock: "+((double)(Tree.RockBeads)/Tree.totalBeads));
+        System.out.println("Probability of Paper: "+((double)(Tree.PaperBeads)/Tree.totalBeads));
+        System.out.println("Probability of Scissor: "+((double)(Tree.SciBeads)/Tree.totalBeads));
+
+        Tree  = this.SciTree;
+        System.out.println("==Scissors Tree report==");
+        System.out.println("Probability of Rock: "+((double)(Tree.RockBeads)/Tree.totalBeads));
+        System.out.println("Probability of Paper: "+((double)(Tree.PaperBeads)/Tree.totalBeads));
+        System.out.println("Probability of Scissor: "+((double)(Tree.SciBeads)/Tree.totalBeads));
+
+        
     }
-	
-	public void reward(char Tree,char option){
-		if(Tree == 'R'){
-			for(int i=0;i<9;i++){
-				if(RockTree[i] == 'X'){
-					RockTree[i] = option;
-					break;
-				}
-			}
+
+	public void reward(char tree,char option){
+        Matchbox Tree;
+		if( tree == 'R'){
+            Tree = this.RockTree;
 		}
-		else if(Tree == 'P'){
-			for(int i=0;i<9;i++){
-				if(PaperTree[i] == 'X'){
-					PaperTree[i] = option;
-					break;
-				}
-			}
+		else if(tree == 'P'){
+			Tree = this.PaperTree;
 		}
 		else{
-			for(int i=0;i<9;i++){
-				if(SciTree[i] == 'X'){
-					SciTree[i] = option;
-					break;
-				}
-			}
+            Tree = this.SciTree;
 		}
+
+        Tree.add(option);
 	}
     
-	public void punish(char Tree,char option){
-		if(Tree == 'R'){
-			for(int i=0;i<9;i++){
-				if(RockTree[i] == option){
-					RockTree[i] = 'X';
-					break;
-				}
-			}
+	public void punish(char tree,char option){
+		Matchbox Tree;
+		if( tree == 'R'){
+            Tree = this.RockTree;
 		}
-		else if(Tree == 'P'){
-			for(int i=0;i<9;i++){
-				if(PaperTree[i] == option){
-					PaperTree[i] = 'X';
-					break;
-				}
-			}
+		else if(tree == 'P'){
+			Tree = this.PaperTree;
 		}
 		else{
-			for(int i=0;i<9;i++){
-				if(SciTree[i] == option){
-					SciTree[i] = 'X';
-					break;
-				}
-			}
+            Tree = this.SciTree;
 		}
+
+        Tree.remove(option);
 	}
 }
 
 class Judge{
-    public static int response(char A,char B){
+    public int verdict(char A,char B){
+        //-1 if A wins, 0 if draw, 1 if B wins
         if(A==B){
             return 0;
         }
