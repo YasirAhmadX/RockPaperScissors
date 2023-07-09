@@ -56,7 +56,7 @@ public class Main{  //Environment
         {          
             System.out.println("\nPlay "+(i+1));
             Random r = new Random();
-            char A = plays[r.nextInt(0,3)];
+            char A = plays[r.nextInt(3)];
             char B = bot.play(A);
             int result = Judge.verdict(A,B);
             System.out.println("JUDGE -> "+A+" vs "+B+": "+result);
@@ -168,10 +168,10 @@ class Agent{
 
         //Suppose the tree is arranged as array [r,r,r,p,p,s,s,s,s] then picking randomly
         int bead = rand.nextInt(Tree.totalBeads);
-        if(bead <= Tree.RockBeads){
+        if(bead%3 == 0){
             response = 'R';
         }
-        else if(bead <= Tree.RockBeads + Tree.PaperBeads){
+        else if(bead%3 == 1){
             response = 'P';
         }
         else{
